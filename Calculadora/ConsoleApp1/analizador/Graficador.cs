@@ -24,7 +24,7 @@ namespace ConsoleApp1.analizador
         {
             foreach (ParseTreeNode hijo in raiz.ChildNodes)
             {
-                String nameHijo = "nodo" + contador.ToString();
+                string nameHijo = "nodo" + contador.ToString();
                 grafo += nameHijo + "[label=\"" + escapar(hijo.ToString()) + "\"];\n";
                 grafo += padre + "->" + nameHijo + ";\n";
                 contador++;

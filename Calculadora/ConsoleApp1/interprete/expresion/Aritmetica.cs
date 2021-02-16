@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using ConsoleApp1.interprete.simbolo;
 
 namespace ConsoleApp1.interprete.expresion
 {
@@ -16,22 +17,33 @@ namespace ConsoleApp1.interprete.expresion
             this.derecha = derecha;
             this.tipo = tipo;
         }
-        public override double evaluar()
+        public override Simbolo evaluar(Entorno entorno)
         {
-            double izquierda = this.izquierda.evaluar();
-            double derecha = this.derecha.evaluar();
+            Simbolo izquierda = this.izquierda.evaluar(entorno);
+            Simbolo derecha = this.derecha.evaluar(entorno);
+            Simbolo resultado;
+            Tipos tipoResultante = util.TablaTipos.getTipo(izquierda.tipo, derecha.tipo);
+
+            if (tipoResultante != Tipos.INT && tipo != '+')
+                throw new Exception();
+
             switch (tipo)
             {
                 case '+':
-                    return izquierda + derecha;
+                    resultado = new Simbolo(double.Parse(izquierda.ToString()) + double.Parse(derecha.ToString()), izquierda.tipo, null);
+                    return resultado;
                 case '-':
-                    return izquierda - derecha;
+                    resultado = new Simbolo(double.Parse(izquierda.ToString()) - double.Parse(derecha.ToString()), izquierda.tipo, null);
+                    return resultado;
                 case '*':
-                    return izquierda * derecha;
+                    resultado = new Simbolo(double.Parse(izquierda.ToString()) * double.Parse(derecha.ToString()), izquierda.tipo, null);
+                    return resultado;
                 case '/':
-                    return izquierda / derecha;
+                    resultado = new Simbolo(double.Parse(izquierda.ToString()) / double.Parse(derecha.ToString()), izquierda.tipo, null);
+                    return resultado;
                 default:
-                    return izquierda % derecha;
+                    resultado = new Simbolo(double.Parse(izquierda.ToString()) % double.Parse(derecha.ToString()), izquierda.tipo, null);
+                    return resultado;
             }
         }
     }

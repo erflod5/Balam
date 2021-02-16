@@ -19,16 +19,27 @@ namespace ConsoleApp1.analizador
 
             #region Terminales
             var EVALUAR = ToTerm("evaluar");
+            var IF = ToTerm("if");
+            var ELSE = ToTerm("else");
 
             var PTO_COMA = ToTerm(";");
             var PAR_ABRE = ToTerm("(");
             var PAR_CIERRA = ToTerm(")");
+
+            var LLAVE_ABRE = ToTerm("{");
+            var LLAVE_CIERRA = ToTerm("}");
 
             var MAS = ToTerm("+");
             var MENOS = ToTerm("-");
             var POR = ToTerm("*");
             var MOD = ToTerm("%");
             var DIV = ToTerm("/");
+
+            var EQ = ToTerm("==");
+            var NOTEQ = ToTerm("!=");
+            var LESS = ToTerm("<");
+            var GRT = ToTerm(">");
+
             #endregion
 
             #region NoTerminales
@@ -36,6 +47,9 @@ namespace ConsoleApp1.analizador
             NonTerminal Instrucciones = new NonTerminal("Instrucciones");
             NonTerminal Instruccion = new NonTerminal("Instruccion");
             NonTerminal Expr = new NonTerminal("Expr");
+            NonTerminal If = new NonTerminal("If");
+            NonTerminal Else = new NonTerminal("Else");
+            NonTerminal Evaluar = new NonTerminal("Evaluar");
             #endregion
 
             #region Gramatica
@@ -47,10 +61,27 @@ namespace ConsoleApp1.analizador
                 ;
 
             Instruccion.Rule
-                = EVALUAR + PAR_ABRE + Expr + PAR_CIERRA + PTO_COMA
+                = Evaluar
+                | If
                 ;
             Instruccion.ErrorRule
-                = SyntaxError + PTO_COMA;
+                = SyntaxError + PTO_COMA
+                | SyntaxError + LLAVE_CIERRA
+                ;
+
+            Evaluar.Rule
+                = EVALUAR + PAR_ABRE + Expr + PAR_CIERRA + PTO_COMA
+                ;
+
+            If.Rule
+                = IF + PAR_ABRE + Expr + PAR_CIERRA + LLAVE_ABRE + Instrucciones + LLAVE_CIERRA + Else
+                | IF + PAR_ABRE + Expr + PAR_CIERRA + LLAVE_ABRE + Instrucciones + LLAVE_CIERRA 
+                ;
+
+            Else.Rule
+                = ELSE + LLAVE_ABRE + Instrucciones + LLAVE_CIERRA
+                | ELSE + If
+                ;
 
             Expr.Rule
                 = Expr + MAS + Expr
@@ -58,6 +89,10 @@ namespace ConsoleApp1.analizador
                 | Expr + POR + Expr
                 | Expr + DIV + Expr
                 | Expr + MOD + Expr
+                | Expr + EQ + Expr
+                | Expr + NOTEQ + Expr
+                | Expr + LESS + Expr
+                | Expr + GRT + Expr
                 | INT
                 | DOUBLE
                 ;
@@ -65,9 +100,10 @@ namespace ConsoleApp1.analizador
 
             #region Preferencias
             this.Root = Raiz;
-            this.RegisterOperators(1, Associativity.Left, MAS, MENOS);
-            this.RegisterOperators(2, Associativity.Left, POR, DIV);
-            this.RegisterOperators(3, Associativity.Left, MOD);
+            this.RegisterOperators(1, Associativity.Left, EQ, NOTEQ, LESS, GRT);
+            this.RegisterOperators(2, Associativity.Left, MAS, MENOS);
+            this.RegisterOperators(3, Associativity.Left, POR, DIV);
+            this.RegisterOperators(4, Associativity.Left, MOD);
             #endregion
         }
 

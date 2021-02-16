@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using ConsoleApp1.interprete.expresion;
+using ConsoleApp1.interprete.simbolo;
 
 namespace ConsoleApp1.interprete.instruccion
 {
@@ -14,10 +15,10 @@ namespace ConsoleApp1.interprete.instruccion
             this.valor = valor;
         }
 
-        public override object ejecutar()
+        public override object ejecutar(Entorno entorno)
         {
-            double valor = this.valor.evaluar();
-            Console.WriteLine("El valor es: " + valor);
+            Simbolo valor = this.valor.evaluar(entorno);
+            Console.WriteLine(valor.valor.ToString());
             return null;
         }
     }

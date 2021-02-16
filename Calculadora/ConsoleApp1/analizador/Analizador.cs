@@ -6,6 +6,7 @@ using Irony.Ast;
 using Irony.Parsing;
 using ConsoleApp1.interprete.expresion;
 using ConsoleApp1.interprete.instruccion;
+using ConsoleApp1.interprete.simbolo;
 
 namespace ConsoleApp1.analizador
 {
@@ -35,9 +36,10 @@ namespace ConsoleApp1.analizador
 
         public void ejecutar(LinkedList<Instruccion> instrucciones)
         {
+            Entorno global = new Entorno(null);
             foreach (var instruccion in instrucciones)
             {
-                instruccion.ejecutar();
+                instruccion.ejecutar(global);
             }
         }
         public LinkedList<Instruccion> instrucciones(ParseTreeNode actual)
@@ -45,10 +47,37 @@ namespace ConsoleApp1.analizador
             LinkedList<Instruccion> listaInstrucciones = new LinkedList<Instruccion>();
             foreach(ParseTreeNode nodo in actual.ChildNodes)
             {
-                //Console.WriteLine(expresion(nodo.ChildNodes[2]));
-                listaInstrucciones.AddLast(new Evaluar(expresion(nodo.ChildNodes[2])));
+                listaInstrucciones.AddLast(instruccion(nodo.ChildNodes[0]));
             }
             return listaInstrucciones;
+        }
+
+        public Instruccion instruccion(ParseTreeNode actual)
+        {
+            switch (actual.ChildNodes[0].Token.Text)
+            {
+                case "evaluar":
+                    return new Evaluar(expresion(actual.ChildNodes[2]));
+                case "if":
+                    if(actual.ChildNodes.Count == 8)
+                    {
+                        return new If(expresion(actual.ChildNodes[2]), instrucciones(actual.ChildNodes[5]),instruccion(actual.ChildNodes[7]));
+                    }
+                    else
+                    {
+                        return new If(expresion(actual.ChildNodes[2]), instrucciones(actual.ChildNodes[5]), null);
+                    }
+                case "else":
+                    if(actual.ChildNodes.Count == 2)
+                    {
+                        return new Else(instruccion(actual.ChildNodes[1]));
+                    }
+                    else
+                    {
+                        return new Else(instrucciones(actual.ChildNodes[2]));
+                    }
+            }
+            return null;
         }
 
         public Expresion expresion(ParseTreeNode actual)
@@ -59,25 +88,27 @@ namespace ConsoleApp1.analizador
                 switch (operador)
                 {
                     case "+":
-                        //return expresion(actual.ChildNodes[0]) + expresion(actual.ChildNodes[2]);
                         return new Aritmetica(expresion(actual.ChildNodes[0]), expresion(actual.ChildNodes[2]), '+');
                     case "-":
-                        //return expresion(actual.ChildNodes[0]) - expresion(actual.ChildNodes[2]);
                         return new Aritmetica(expresion(actual.ChildNodes[0]), expresion(actual.ChildNodes[2]), '-');
                     case "*":
-                        //return expresion(actual.ChildNodes[0]) * expresion(actual.ChildNodes[2]);
                         return new Aritmetica(expresion(actual.ChildNodes[0]), expresion(actual.ChildNodes[2]), '*');
                     case "/":
-                        //return expresion(actual.ChildNodes[0]) / expresion(actual.ChildNodes[2]);
                         return new Aritmetica(expresion(actual.ChildNodes[0]), expresion(actual.ChildNodes[2]), '/');
+                    case "==":
+                        return new Relacional(expresion(actual.ChildNodes[0]), expresion(actual.ChildNodes[2]), '=');
+                    case "!=":
+                        return new Relacional(expresion(actual.ChildNodes[0]), expresion(actual.ChildNodes[2]), '!');
+                    case ">":
+                        return new Relacional(expresion(actual.ChildNodes[0]), expresion(actual.ChildNodes[2]), '>');
+                    case "<":
+                        return new Relacional(expresion(actual.ChildNodes[0]), expresion(actual.ChildNodes[2]), '<');
                     default:
-                        //return expresion(actual.ChildNodes[0]) % expresion(actual.ChildNodes[2]);
                         return new Aritmetica(expresion(actual.ChildNodes[0]), expresion(actual.ChildNodes[2]), '%');
                 }
             }
             else
             {
-                //return double.Parse(actual.ChildNodes[0].Token.Text);
                 //TODO ver tipos
                 return new Literal('N', actual.ChildNodes[0].Token.Text);
             }
